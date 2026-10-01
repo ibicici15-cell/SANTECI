@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 
@@ -11,6 +11,12 @@ import { supabase } from '../lib/supabaseClient'
 export default function useNonLusMessagerie(utilisateur, role) {
   const [nonLus, setNonLus] = useState(0)
   const location = useLocation()
+  // Ce hook est utilisé en même temps par plusieurs composants (barre du
+  // haut ET barre d'onglets mobile) : chaque instance a besoin de son
+  // propre canal Realtime, sinon la deuxième tente de s'abonner à un nom
+  // de canal déjà pris par la première, ce qui fait planter l'app
+  // ("cannot add postgres_changes callbacks ... after subscribe()").
+  const idInstance = useRef(Math.random().toString(36).slice(2)).current
 
   const charger = async () => {
     if (!utilisateur || !['patient', 'professionnel', 'laboratoire'].includes(role)) { setNonLus(0); return }
@@ -38,7 +44,7 @@ export default function useNonLusMessagerie(utilisateur, role) {
   useEffect(() => {
     if (!utilisateur) return
     const canal = supabase
-      .channel(`nonlus-messagerie-${utilisateur.id}`)
+      .channel(`nonlus-messagerie-${utilisateur.id}-${idInstance}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => charger())
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages_labo' }, () => charger())
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages_collaboration' }, () => charger())
