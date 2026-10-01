@@ -4,14 +4,24 @@ import { naviguer } from './navigationRef'
 
 let dejaInitialise = false
 
+// Interrupteur de sécurité : tant que la configuration Firebase
+// (google-services.json + plugin Gradle, voir GUIDE_PUSH.md) n'est pas
+// faite, le plugin natif peut planter l'app au lancement de
+// PushNotifications.register() — un crash natif qu'aucun try/catch
+// JavaScript ne peut rattraper. On n'appelle donc JAMAIS le plugin tant
+// que ce drapeau n'est pas explicitement activé (VITE_PUSH_ACTIVE=true
+// dans .env, après avoir terminé la config Firebase), pour que la
+// connexion/inscription ne dépende jamais de ça entre-temps.
+const PUSH_ACTIF = import.meta.env.VITE_PUSH_ACTIVE === 'true'
+
 /**
  * Demande la permission, récupère le jeton FCM et l'enregistre pour cet
  * utilisateur — à appeler une fois après connexion. Ne fait rien en dehors
- * de l'app Android (web, aperçu navigateur) : le push n'existe que côté
- * natif.
+ * de l'app Android (web, aperçu navigateur), ni tant que VITE_PUSH_ACTIVE
+ * n'est pas activé.
  */
 export async function initialiserPush(utilisateurId) {
-  if (!Capacitor.isNativePlatform() || !utilisateurId || dejaInitialise) return
+  if (!PUSH_ACTIF || !Capacitor.isNativePlatform() || !utilisateurId || dejaInitialise) return
   dejaInitialise = true
 
   try {
