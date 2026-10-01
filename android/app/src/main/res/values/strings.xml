@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Santé-CI</string>
+    <string name="title_activity_main">Santé-CI</string>
+    <string name="package_name">ci.santeci.app</string>
+    <string name="custom_url_scheme">ci.santeci.app</string>
+</resources>

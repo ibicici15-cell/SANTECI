@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Nécessaire pour une Single Page App (React Router) : sans ça, actualiser
+# la page sur une route comme /patient/tableau-de-bord renvoie une 404 —
+# Netlify doit toujours servir index.html et laisser React Router gérer la route.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

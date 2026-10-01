@@ -1,0 +1,16 @@
+{
+  "appId": "ci.santeci.app",
+  "appName": "Santé-CI",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#0B6E4F",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    }
+  }
+}
