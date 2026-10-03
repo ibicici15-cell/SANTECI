@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="notification_accent">#F77F00</color>
+    <!-- Couleur derrière la barre d'état et les boutons de navigation du téléphone -->
+    <color name="app_window_background">#201D19</color>
+</resources>

@@ -1,0 +1,145 @@
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient'
+import { SPECIALITES_LISTE, VILLES_CI } from '../lib/constantes'
+import { useAuth } from '../context/AuthContext'
+import SelectAvecAutre from '../components/SelectAvecAutre'
+
+export default function InscriptionProfessionnel() {
+  const navigate = useNavigate()
+  const { synchroniserSession } = useAuth()
+  const [form, setForm] = useState({
+    nom: '', prenom: '', email: '', telephone: '', mot_de_passe: '',
+    specialite: '', numero_autorisation: '', ville: '', adresse_cabinet: '',
+    tarif_consultation: '', biographie: '',
+  })
+  const [erreur, setErreur] = useState('')
+  const [chargement, setChargement] = useState(false)
+
+  const maj = (champ) => (e) => setForm(f => ({ ...f, [champ]: e.target.value }))
+
+  const soumettre = async (e) => {
+    e.preventDefault()
+    setErreur('')
+    setChargement(true)
+
+    const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.mot_de_passe })
+    if (error) { setErreur(error.message); setChargement(false); return }
+
+    const userId = data.user?.id
+    if (!userId) {
+      setErreur('Vérifiez votre boîte e-mail pour confirmer votre inscription avant de continuer.')
+      setChargement(false)
+      return
+    }
+
+    const { error: erreurProfil } = await supabase.from('profiles').insert({
+      id: userId, role: 'professionnel', email: form.email, telephone: form.telephone,
+    })
+    if (erreurProfil) { setErreur(erreurProfil.message); setChargement(false); return }
+
+    // La création déclenche automatiquement l'essai gratuit d'un mois (trigger SQL)
+    const { error: erreurPro } = await supabase.from('professionnels').insert({
+      id: userId,
+      nom: form.nom,
+      prenom: form.prenom,
+      specialite: form.specialite,
+      numero_autorisation: form.numero_autorisation,
+      ville: form.ville,
+      adresse_cabinet: form.adresse_cabinet,
+      tarif_consultation: form.tarif_consultation ? Number(form.tarif_consultation) : null,
+      biographie: form.biographie,
+      modes_consultation: ['cabinet'],
+    })
+    setChargement(false)
+    if (erreurPro) { setErreur(erreurPro.message); return }
+
+    await synchroniserSession()
+    navigate('/professionnel/tableau-de-bord')
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-16">
+      <h1 className="font-display text-2xl font-bold text-charbon">Créer mon espace professionnel</h1>
+      <p className="text-ardoise text-sm mt-1">
+        1 mois d'essai gratuit inclus, sans carte bancaire. Une fois inscrit, rendez-vous dans
+        « Modifier mon profil » pour téléverser votre carte professionnelle ou diplôme : c'est ce
+        document qui permettra à notre équipe de valider votre compte et de vous faire apparaître
+        dans les recherches.
+      </p>
+
+      <form onSubmit={soumettre} className="carte p-6 mt-6 space-y-4">
+        {erreur && <p className="text-sm text-alerte bg-alerte/10 rounded-lg px-3 py-2">{erreur}</p>}
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="etiquette">Prénom</label>
+            <input required className="champ" value={form.prenom} onChange={maj('prenom')} />
+          </div>
+          <div>
+            <label className="etiquette">Nom</label>
+            <input required autoFocus className="champ" value={form.nom} onChange={maj('nom')} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="etiquette">Adresse e-mail</label>
+            <input type="email" required className="champ" value={form.email} onChange={maj('email')} />
+          </div>
+          <div>
+            <label className="etiquette">Téléphone</label>
+            <input type="tel" placeholder="+225 07 00 00 00 00" required className="champ" value={form.telephone} onChange={maj('telephone')} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="etiquette">Spécialité</label>
+            <SelectAvecAutre required optionVide="Sélectionner…" options={SPECIALITES_LISTE} value={form.specialite}
+              onChange={v => setForm(f => ({ ...f, specialite: v }))} placeholderAutre="Précisez votre spécialité" />
+          </div>
+          <div>
+            <label className="etiquette">N° d'autorisation d'exercice</label>
+            <input required className="champ" value={form.numero_autorisation} onChange={maj('numero_autorisation')} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="etiquette">Ville</label>
+            <SelectAvecAutre required optionVide="Sélectionner…" options={VILLES_CI} value={form.ville}
+              onChange={v => setForm(f => ({ ...f, ville: v }))} placeholderAutre="Précisez votre ville" />
+          </div>
+          <div>
+            <label className="etiquette">Tarif consultation (FCFA)</label>
+            <input type="number" min="0" className="champ" value={form.tarif_consultation} onChange={maj('tarif_consultation')} />
+          </div>
+        </div>
+
+        <div>
+          <label className="etiquette">Adresse du cabinet</label>
+          <input className="champ" value={form.adresse_cabinet} onChange={maj('adresse_cabinet')} />
+        </div>
+
+        <div>
+          <label className="etiquette">Biographie courte</label>
+          <textarea rows={3} className="champ" value={form.biographie} onChange={maj('biographie')} />
+        </div>
+
+        <div>
+          <label className="etiquette">Mot de passe</label>
+          <input type="password" required minLength={6} className="champ" value={form.mot_de_passe} onChange={maj('mot_de_passe')} />
+        </div>
+
+        <button disabled={chargement} className="btn-secondaire w-full">
+          {chargement ? 'Création…' : 'Créer mon espace professionnel'}
+        </button>
+      </form>
+
+      <p className="text-sm text-ardoise text-center mt-6">
+        Déjà un compte ? <Link to="/connexion" className="text-foret font-semibold">Se connecter</Link>
+      </p>
+    </div>
+  )
+}
