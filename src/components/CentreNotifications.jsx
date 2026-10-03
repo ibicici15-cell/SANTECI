@@ -44,7 +44,12 @@ export default function CentreNotifications() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `destinataire_id=eq.${utilisateur.id}` },
         () => charger())
       .subscribe()
-    return () => supabase.removeChannel(canal)
+    // Recharge aussi quand un push arrive app ouverte (voir lib/push.js)
+    window.addEventListener('sante:notification', charger)
+    return () => {
+      window.removeEventListener('sante:notification', charger)
+      supabase.removeChannel(canal)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [utilisateur?.id])
 
@@ -86,15 +91,15 @@ export default function CentreNotifications() {
       </button>
 
       {ouvert && (
-        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto carte p-0 z-50">
+        <div className="fixed left-2 right-2 top-[4.25rem] max-h-[70vh] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:max-h-96 overflow-y-auto overflow-x-hidden carte p-0 z-50">
           <p className="font-display font-semibold text-sm px-4 py-3 border-b border-ligne">Notifications</p>
           {notifications.length === 0 ? (
             <p className="text-sm text-ardoise p-4">Aucune notification pour le moment.</p>
           ) : (
             notifications.map(n => (
               <div key={n.id} className="px-4 py-3 border-b border-ligne last:border-0">
-                <p className="text-sm font-medium text-charbon">{n.titre}</p>
-                {n.contenu && <p className="text-xs text-ardoise mt-0.5">{n.contenu}</p>}
+                <p className="text-sm font-medium text-charbon break-words">{n.titre}</p>
+                {n.contenu && <p className="text-xs text-ardoise mt-0.5 break-words">{n.contenu}</p>}
                 <p className="text-[11px] text-ardoise/70 mt-1">{ilYA(n.created_at)}</p>
               </div>
             ))

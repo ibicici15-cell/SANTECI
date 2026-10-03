@@ -46,6 +46,12 @@ export async function initialiserPush(utilisateurId) {
       console.error('Erreur d\'enregistrement push :', err)
     })
 
+    // Push reçu pendant que l'app est ouverte : Android n'affiche alors rien
+    // de lui-même. On prévient la cloche pour qu'elle se recharge aussitôt.
+    PushNotifications.addListener('pushNotificationReceived', () => {
+      window.dispatchEvent(new Event('sante:notification'))
+    })
+
     // L'utilisateur tape sur la notification (app en arrière-plan ou fermée)
     PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
       const lien = action.notification?.data?.lien
