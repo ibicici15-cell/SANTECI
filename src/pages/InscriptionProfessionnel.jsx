@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 import { SPECIALITES_LISTE, VILLES_CI } from '../lib/constantes'
 import { useAuth } from '../context/AuthContext'
 import SelectAvecAutre from '../components/SelectAvecAutre'
+import ChampMotDePasse from '../components/ChampMotDePasse'
 
 export default function InscriptionProfessionnel() {
   const navigate = useNavigate()
@@ -129,7 +130,7 @@ export default function InscriptionProfessionnel() {
 
         <div>
           <label className="etiquette">Mot de passe</label>
-          <input type="password" required minLength={6} className="champ" value={form.mot_de_passe} onChange={maj('mot_de_passe')} />
+          <ChampMotDePasse required minLength={6} value={form.mot_de_passe} onChange={maj('mot_de_passe')} />
         </div>
 
         <button disabled={chargement} className="btn-secondaire w-full">

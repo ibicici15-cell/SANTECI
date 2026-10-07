@@ -30,8 +30,8 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-fond/90 backdrop-blur border-b border-ligne">
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
-        <Link to="/" className="flex items-center gap-2 font-display font-extrabold text-lg text-charbon whitespace-nowrap shrink-0">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2 font-display font-extrabold text-lg text-charbon">
           <span className="w-8 h-8 rounded-lg bg-foret flex items-center justify-center text-white">
             <Stethoscope size={18} />
           </span>
@@ -47,7 +47,7 @@ export default function Navbar() {
           )}
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3">
           {!utilisateur && (
             <>
               <Link to="/connexion" className="hidden sm:inline-flex btn-fantome !px-4 !py-2 text-sm">Connexion</Link>
@@ -67,10 +67,10 @@ export default function Navbar() {
                   )}
                 </Link>
               )}
-              <span className="hidden lg:inline text-sm text-ardoise truncate max-w-[14rem]">
+              <span className="hidden sm:inline text-sm text-ardoise">
                 {detail?.prenom ? `Bonjour, ${detail.prenom}` : utilisateur.email}
               </span>
-              <Link to={tableauDeBordParRole[role] || '/'} className="hidden sm:inline-flex btn-secondaire !px-4 !py-2 text-sm whitespace-nowrap">
+              <Link to={tableauDeBordParRole[role] || '/'} className="hidden sm:inline-flex btn-secondaire !px-4 !py-2 text-sm">
                 Tableau de bord
               </Link>
               <button onClick={seDeconnecter} aria-label="Déconnexion" className="btn-fantome !px-3 sm:!px-4 !py-2 text-sm flex items-center gap-1.5">

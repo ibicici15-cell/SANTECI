@@ -24,9 +24,18 @@ export default function ModaleCompteRendu({ rdv, utilisateurId, onFerme, onTermi
       recommandations: note.recommandations,
     }).select().single()
 
-    // La notification "Compte-rendu disponible" au patient est créée côté
-    // serveur (déclencheur sur la table consultations, mise à jour n°18) :
-    // un utilisateur ne peut pas créer de notification pour quelqu'un d'autre.
+    // Le compte-rendu (et son ordonnance éventuelle, affichée avec lui
+    // dans "Mes comptes-rendus") n'apparaissaient auparavant nulle part
+    // côté patient : une seule notification par consultation suffit
+    // désormais, l'ordonnance étant rattachée au même endroit.
+    await supabase.from('notifications').insert({
+      destinataire_id: rdv.patient_id,
+      type: 'document_disponible',
+      titre: 'Compte-rendu disponible',
+      contenu: 'Votre professionnel a ajouté un compte-rendu suite à votre consultation.',
+      lien: '/patient/comptes-rendus',
+      entite_id: consultation.id,
+    })
 
     if (ordonnance.contenu.trim()) {
       let cheminFichier = null

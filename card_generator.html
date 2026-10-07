@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANTÉ-CI - Cabinet Médical Espérance</title>
+    <style>
+      body {
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .card {
+        width: 100%;
+        max-width: 380px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+      }
+      .header {
+        background-color: #ff7900;
+        color: white;
+        text-align: center;
+        padding: 20px;
+      }
+      .header h2 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: 1px;
+      }
+      .header p {
+        margin: 5px 0 0;
+        font-style: italic;
+        font-size: 14px;
+      }
+      .body {
+        padding: 20px;
+        text-align: center;
+      }
+      .body h3 {
+        color: #008751;
+        margin-bottom: 5px;
+        font-size: 18px;
+      }
+      .body h4 {
+        color: #333333;
+        margin: 5px 0;
+        font-size: 16px;
+      }
+      .specialty {
+        color: #666666;
+        font-size: 14px;
+        margin-bottom: 15px;
+      }
+      .divider {
+        border: 0;
+        border-top: 1px dashed #cccccc;
+        margin: 15px 0;
+      }
+      .info-row {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #444;
+      }
+      .qr-section {
+        margin-top: 20px;
+        background: #fafafa;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+      }
+      .qr-section p {
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 10px;
+        font-weight: 500;
+      }
+      .qr-code {
+        width: 130px;
+        height: 130px;
+        object-fit: contain;
+      }
+      .footer-link {
+        margin-top: 20px;
+      }
+      .footer-link a {
+        color: #ff7900;
+        font-weight: bold;
+        text-decoration: none;
+        font-size: 14px;
+      }
+      .footer-link a:hover {
+        text-decoration: underline;
+      }
+    </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- En-tête -->
+  <div class="header">
+    <h2>SANTÉ-CI</h2>
+    <p>Votre santé, plus simplement.</p>
+  </div>
+
+  <!-- Contenu Principal -->
+  <div class="body">
+   <!-- <h3>CABINET MÉDICAL ESPÉRANCE</h3>-->
+    <h4>Dr SAMOUKA DORE </h4>
+    <p class="specialty">Médecin spécialiste</p>
+
+    <hr class="divider">
+
+    <div class="info-row">
+      <span>📍 Abidjan</span>
+    </div>
+
+    <!-- Section Téléchargement & QR Code -->
+    <div class="qr-section">
+      <p>Scannez pour télécharger l'application</p>
+      <img id="qrImage" src="" alt="QR Code Application" class="qr-code">
+    </div>
+
+    <!-- Lien Web affiché de façon courte sur la carte -->
+    <div class="footer-link">
+      <a id="profileLink" href="#" target="_blank"></a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 1. Votre lien APK pour le QR code
+  const lienAppAPK = "https://votre-site.com/chemin/vers/votre-application.apk";
+  
+  // 2. Le vrai lien complet (avec l'UUID) vers lequel l'utilisateur sera redirigé au clic
+  const lienReelProfil = "https://santeciv.netlify.app/professionnel/d03c1a39-13d2-481e-be05-2b0c75eb9b67";
+  
+  // 3. Le texte court et joli que l'on veut afficher visuellement sur la carte
+  const texteCourtAffiche = "santeciv.netlify.app/dr-samouka-dore";
+
+  // Génération sécurisée du QR Code APK
+  document.getElementById("qrImage").src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(lienAppAPK);
+  
+  // Configuration du lien affiché sur la carte
+  const lienElem = document.getElementById("profileLink");
+  lienElem.href = lienReelProfil;          
+  lienElem.textContent = texteCourtAffiche;   
+</script>
+
+</body>
+</html>

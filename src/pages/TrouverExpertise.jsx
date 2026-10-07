@@ -7,7 +7,7 @@ import Loader from '../components/Loader'
 import SelectAvecAutre from '../components/SelectAvecAutre'
 
 export default function TrouverExpertise() {
-  const { utilisateur } = useAuth()
+  const { utilisateur, detail } = useAuth()
   const [specialite, setSpecialite] = useState('')
   const [ville, setVille] = useState('')
   const [resultats, setResultats] = useState([])
@@ -63,7 +63,15 @@ export default function TrouverExpertise() {
       urgence,
     }).select().single()
 
-    if (error) { setEnvoi(false); setErreur(error.message); return }
+    if (error) {
+      setEnvoi(false)
+      setErreur(
+        error.message.includes('row-level security')
+          ? "Votre compte doit d'abord être validé par un administrateur avant de pouvoir contacter des confrères."
+          : error.message
+      )
+      return
+    }
 
     const { error: erreurDest } = await supabase.from('destinataires_collaboration').insert(
       [...selection].map(professionnel_id => ({ demande_id: demande.id, professionnel_id }))
@@ -93,6 +101,15 @@ export default function TrouverExpertise() {
         filtres si besoin. Ce n'est pas une prise de rendez-vous, juste une mise en relation
         entre professionnels.
       </p>
+
+      {detail && detail.valide_par_admin === false && (
+        <div className="carte p-4 mt-6 bg-ambre-light border-ambre/30">
+          <p className="text-sm text-ambre-dark font-medium">
+            Votre compte n'est pas encore validé par un administrateur — vous pourrez contacter des
+            confrères une fois la validation effectuée.
+          </p>
+        </div>
+      )}
 
       <div className="carte p-4 mt-6 flex flex-col sm:flex-row gap-3">
         <div className="flex-1"><SelectAvecAutre optionVide="Toutes les spécialités" options={SPECIALITES_LISTE} value={specialite}

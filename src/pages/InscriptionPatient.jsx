@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import ChampMotDePasse from '../components/ChampMotDePasse'
 
 export default function InscriptionPatient() {
   const navigate = useNavigate()
@@ -102,7 +103,7 @@ export default function InscriptionPatient() {
 
         <div>
           <label className="etiquette">Mot de passe</label>
-          <input type="password" required minLength={6} className="champ" value={form.mot_de_passe} onChange={maj('mot_de_passe')} />
+          <ChampMotDePasse required minLength={6} value={form.mot_de_passe} onChange={maj('mot_de_passe')} />
         </div>
 
         <button disabled={chargement} className="btn-primaire w-full">

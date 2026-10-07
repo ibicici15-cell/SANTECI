@@ -7,6 +7,8 @@ import RouteProtegee from './components/RouteProtegee'
 
 import Accueil from './pages/Accueil'
 import Connexion from './pages/Connexion'
+import MotDePasseOublie from './pages/MotDePasseOublie'
+import ReinitialiserMotDePasse from './pages/ReinitialiserMotDePasse'
 import ChoixInscription from './pages/ChoixInscription'
 import InscriptionPatient from './pages/InscriptionPatient'
 import InscriptionProfessionnel from './pages/InscriptionProfessionnel'
@@ -53,6 +55,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Accueil />} />
           <Route path="/connexion" element={<Connexion />} />
+          <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+          <Route path="/reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
           <Route path="/inscription" element={<ChoixInscription />} />
           <Route path="/inscription/patient" element={<InscriptionPatient />} />
           <Route path="/inscription/professionnel" element={<InscriptionProfessionnel />} />

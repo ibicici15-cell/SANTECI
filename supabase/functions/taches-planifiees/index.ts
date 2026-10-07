@@ -66,52 +66,6 @@ Deno.serve(async (req) => {
     const { error: erreurCollab } = await admin.rpc('expirer_collaborations')
     if (erreurCollab) console.error('[taches-planifiees] expirer_collaborations:', erreurCollab.message)
 
-    // ---- Notifications push (Android) — traité EN PREMIER pour être rapide ----
-    const { data: notifsAPusher, error: erreurPushSelect } = await admin
-      .from('notifications')
-      .select('id, destinataire_id, titre, contenu, lien')
-      .eq('push_envoye', false)
-      .order('created_at', { ascending: true })
-      .limit(50)
-
-    let pushEnvoyees = 0
-    if (erreurPushSelect) {
-      console.error('[taches-planifiees] lecture notifications push:', erreurPushSelect.message)
-    } else {
-      for (const notif of notifsAPusher ?? []) {
-        await admin.from('notifications').update({ push_tente_le: new Date().toISOString() }).eq('id', notif.id)
-
-        const { data: jetons } = await admin
-          .from('push_tokens')
-          .select('token')
-          .eq('utilisateur_id', notif.destinataire_id)
-
-        if (!jetons || jetons.length === 0) {
-          // Aucun appareil enregistré : rien à envoyer. On clôture la notification
-          // pour qu'elle ne bloque pas la file (limite de 50 par passage).
-          await admin.from('notifications').update({ push_envoye: true }).eq('id', notif.id)
-          continue
-        }
-
-        let auMoinsUnEnvoi = false
-        for (const j of jetons) {
-          const resultat = await envoyerPush(j.token, notif.titre, notif.contenu ?? '', notif.lien ?? undefined)
-          if (resultat.ok) auMoinsUnEnvoi = true
-          else if (resultat.erreur?.includes('UNREGISTERED') || resultat.erreur?.includes('NOT_FOUND')) {
-            // Jeton périmé (app désinstallée, etc.) — on le retire.
-            await admin.from('push_tokens').delete().eq('token', j.token)
-          } else {
-            console.error('[taches-planifiees] échec push', notif.id, resultat.erreur)
-          }
-        }
-
-        if (auMoinsUnEnvoi) {
-          await admin.from('notifications').update({ push_envoye: true }).eq('id', notif.id)
-          pushEnvoyees++
-        }
-      }
-    }
-
     const { data: notifications, error } = await admin
       .from('notifications')
       .select('id, destinataire_id, titre, contenu, lien')
@@ -139,6 +93,47 @@ Deno.serve(async (req) => {
       if (resultat.ok) {
         await admin.from('notifications').update({ sms_envoye: true }).eq('id', notif.id)
         envoyees++
+      }
+    }
+
+    // ---- Notifications push (Android) — même principe que les SMS ----
+    const { data: notifsAPusher, error: erreurPushSelect } = await admin
+      .from('notifications')
+      .select('id, destinataire_id, titre, contenu, lien')
+      .eq('push_envoye', false)
+      .order('created_at', { ascending: true })
+      .limit(50)
+
+    let pushEnvoyees = 0
+    if (erreurPushSelect) {
+      console.error('[taches-planifiees] lecture notifications push:', erreurPushSelect.message)
+    } else {
+      for (const notif of notifsAPusher ?? []) {
+        await admin.from('notifications').update({ push_tente_le: new Date().toISOString() }).eq('id', notif.id)
+
+        const { data: jetons } = await admin
+          .from('push_tokens')
+          .select('token')
+          .eq('utilisateur_id', notif.destinataire_id)
+
+        if (!jetons || jetons.length === 0) continue
+
+        let auMoinsUnEnvoi = false
+        for (const j of jetons) {
+          const resultat = await envoyerPush(j.token, notif.titre, notif.contenu ?? '', notif.lien ?? undefined)
+          if (resultat.ok) auMoinsUnEnvoi = true
+          else if (resultat.erreur?.includes('UNREGISTERED') || resultat.erreur?.includes('NOT_FOUND')) {
+            // Jeton périmé (app désinstallée, etc.) — on le retire.
+            await admin.from('push_tokens').delete().eq('token', j.token)
+          } else {
+            console.error('[taches-planifiees] échec push', notif.id, resultat.erreur)
+          }
+        }
+
+        if (auMoinsUnEnvoi) {
+          await admin.from('notifications').update({ push_envoye: true }).eq('id', notif.id)
+          pushEnvoyees++
+        }
       }
     }
 

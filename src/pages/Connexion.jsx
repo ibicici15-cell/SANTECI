@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import ChampMotDePasse from '../components/ChampMotDePasse'
 
 const TABLEAU_DE_BORD_PAR_ROLE = {
   patient: '/patient/tableau-de-bord',
@@ -63,8 +64,11 @@ export default function Connexion() {
           <input type="email" required autoFocus className="champ" value={email} onChange={e => setEmail(e.target.value)} />
         </div>
         <div>
-          <label className="etiquette">Mot de passe</label>
-          <input type="password" required className="champ" value={motDePasse} onChange={e => setMotDePasse(e.target.value)} />
+          <div className="flex items-center justify-between">
+            <label className="etiquette">Mot de passe</label>
+            <Link to="/mot-de-passe-oublie" className="text-xs text-foret font-semibold">Mot de passe oublié ?</Link>
+          </div>
+          <ChampMotDePasse required value={motDePasse} onChange={e => setMotDePasse(e.target.value)} />
         </div>
         <button disabled={chargement} className="btn-primaire w-full">
           {chargement ? 'Connexion…' : 'Se connecter'}
